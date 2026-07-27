@@ -72,6 +72,8 @@ vim.keymap.set("v", "<S-Tab>", "<gv", { noremap = true, silent = true, desc = "U
 
 vim.g.loaded_snippets = 1
 
+require("replace").setup()
+
 --- basic
 opt.number = true
 

@@ -65,10 +65,11 @@ return {
 					"goimports",
 					"gofumpt",
 					"stylua",
-					"yamllint",
 					"shellcheck",
 					"golangci-lint",
 					"tflint",
+					-- yamllint installed via Homebrew, not Mason (needs python >=3.10,
+					-- system python is 3.9.6, mason's package fails silently otherwise)
 				},
 
 				auto_update = true,
