@@ -1,7 +1,7 @@
 return {
 	{
 		"nvim-treesitter/nvim-treesitter",
-		branch = "master", -- frozen but stable API (configs.setup); "main" is the new rewrite
+		branch = "main",
 		build = ":TSUpdate",
 		event = { "BufReadPre", "BufNewFile" },
 		config = function()

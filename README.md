@@ -125,5 +125,9 @@ system default:
 
 - **yamllint** — install via `brew install yamllint` (Mason's package needs Python ≥3.10; macOS
   system Python is 3.9.6). Not in `mason-tool-installer`'s `ensure_installed` for this reason.
-- **yaml-language-server** — needs `node` on `$PATH`. If `yamlls` fails to attach, check `node -v`
-  works in the shell Neovim was launched from.
+- **node** — required on `$PATH` for four of the Mason-installed LSPs: `yamlls`, `bashls`,
+  `dockerls`, `jsonls` (all npm packages under the hood). Without it they fail to spawn
+  (`Client <name> quit with exit code 127`), and since the buffer-local `K` mapping in
+  `lsp.lua` is only set inside the `LspAttach` autocmd, diagnostics/hover via `K` silently do
+  nothing on those filetypes too. Install with `brew install node`. `gopls`, `terraformls`, and
+  `lua_ls` don't need it.
