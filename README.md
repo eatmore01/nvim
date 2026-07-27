@@ -1,7 +1,11 @@
-# nvim config
+# nvim 
 
 Personal Neovim config built on [lazy.nvim](https://github.com/folke/lazy.nvim), tuned for DevOps work
 (Terraform, Kubernetes/YAML, Go, Bash, Docker).
+
+```bash
+brew install ripgrep fd node yamllint
+```
 
 ## Structure
 
@@ -125,7 +129,7 @@ system default:
 
 - **yamllint** — install via `brew install yamllint` (Mason's package needs Python ≥3.10; macOS
   system Python is 3.9.6). Not in `mason-tool-installer`'s `ensure_installed` for this reason.
-- **node** — required on `$PATH` for four of the Mason-installed LSPs: `yamlls`, `bashls`,
+- **node** — install via `brew install node` required on `$PATH` for four of the Mason-installed LSPs: `yamlls`, `bashls`,
   `dockerls`, `jsonls` (all npm packages under the hood). Without it they fail to spawn
   (`Client <name> quit with exit code 127`), and since the buffer-local `K` mapping in
   `lsp.lua` is only set inside the `LspAttach` autocmd, diagnostics/hover via `K` silently do
