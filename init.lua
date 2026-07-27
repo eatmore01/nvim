@@ -29,6 +29,19 @@ vim.api.nvim_create_autocmd("VimEnter", {
 	end,
 })
 
+-- for tf repos in multi repo session
+vim.api.nvim_create_autocmd({ "BufReadPost", "BufNewFile" }, {
+	callback = function(ev)
+		if vim.bo[ev.buf].buftype ~= "" then
+			return
+		end
+		local root = vim.fs.root(ev.buf, { ".git", ".terraform" })
+		if root and root ~= vim.fn.getcwd() then
+			vim.cmd.lcd(root)
+		end
+	end,
+})
+
 -- keybindipgs
 vim.keymap.set("n", "<C-b>", "<CMD>NvimTreeToggle<CR>", {
 	desc = "Toggle NvimTree",
@@ -85,6 +98,7 @@ opt.shiftwidth = 2
 opt.expandtab = true
 opt.smartindent = true
 
+-- treesiter responsibility
 opt.autoindent = false
 opt.smartindent = false
 opt.cindent = false

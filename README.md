@@ -4,7 +4,7 @@ Personal Neovim config built on [lazy.nvim](https://github.com/folke/lazy.nvim),
 (Terraform, Kubernetes/YAML, Go, Bash, Docker).
 
 ```bash
-brew install ripgrep fd node yamllint
+brew install ripgrep fd node yamllint tree-sitter-cli
 ```
 
 ## Structure
@@ -17,6 +17,13 @@ lazy-lock.json          -- pinned plugin commits (auto-managed by lazy.nvim, don
 ```
 
 Leader key is `<Space>`.
+
+Window-local `cwd` follows the current buffer's repo root (nearest `.git`/`.terraform`,
+via `vim.fs.root()` on `BufReadPost`/`BufNewFile` in `init.lua`). This keeps Telescope,
+`tflint`/`yamllint` (both resolve their target/config relative to `cwd`, not the buffer's
+directory), and nvim-tree scoped to whichever repo you're actually editing — important
+once you're bouncing between multiple repos (terraform modules, k8s manifests, go
+services, ...) in one session instead of one repo per Neovim instance.
 
 ## Keymaps
 
@@ -65,6 +72,29 @@ quickfix list, then `:cdo s/.../.../gc | update`.
 | `<leader>fh` | Help tags |
 | `<leader>gs` | Git status |
 
+Sorting uses `telescope-fzf-native.nvim` (native C sorter) when it's built successfully;
+silently falls back to Telescope's default lua sorter otherwise (`pcall`-wrapped
+`load_extension`).
+
+### Git / diff review (diffview.nvim)
+
+| Key | Action |
+|---|---|
+| `<leader>gd` | Diff current tree against HEAD |
+| `<leader>gh` | File history for the current file (`DiffviewFileHistory %`) |
+
+Lazy-loaded on `:DiffviewOpen`/`:DiffviewFileHistory`.
+
+### Sessions (persistence.nvim)
+
+| Key | Action |
+|---|---|
+| `<leader>ps` | Restore session for the current directory |
+| `<leader>pl` | Restore the last session (any directory) |
+| `<leader>pd` | Don't save a session on this exit (one-off) |
+
+Session is saved automatically on exit (per-`cwd`), no extra config needed.
+
 ### LSP (buffer-local, set on `LspAttach`)
 
 | Key | Action |
@@ -112,15 +142,17 @@ attaches the matching schema on `BufReadPost` automatically. You can also drive 
 - **lazy.nvim** — plugin manager
 - **mason.nvim** / **mason-lspconfig** / **mason-tool-installer** — install LSPs, formatters, linters
 - **nvim-lspconfig** — LSP client config (yamlls, bashls, gopls, terraformls, lua_ls, jsonls, dockerls)
-- **nvim-treesitter** (branch `master`) — syntax highlighting/indent for hcl, terraform, yaml, go, dockerfile, bash, json, lua, markdown
+- **nvim-treesitter** (branch `main`) — syntax highlighting/indent for hcl, terraform, yaml, go, dockerfile, bash, json, lua, markdown. Uses the rewritten `main`-branch API (`require("nvim-treesitter").install{...}` + a `FileType` autocmd calling `vim.treesitter.start()`/setting `indentexpr` — the old `.configs.setup({highlight=...})` API is gone on this branch). Requires the `tree-sitter` CLI (`brew install tree-sitter-cli`) on `$PATH` to compile parsers.
 - **conform.nvim** — formatting
 - **nvim-lint** — linting
 - **nvim-cmp** + **LuaSnip** — completion/snippets
-- **telescope.nvim** — fuzzy finder
+- **telescope.nvim** (+ **telescope-fzf-native.nvim**) — fuzzy finder
 - **nvim-tree.lua** — file explorer
 - **bufferline.nvim** — buffer tabs
 - **lualine.nvim** — statusline (mode, git branch/diff, diagnostics, filename, filetype, LSP client, location)
 - **mini.comment** — commenting
+- **diffview.nvim** — diff/PR-style review inside nvim
+- **persistence.nvim** — per-directory session save/restore
 
 ## Known external dependencies
 
@@ -135,3 +167,8 @@ system default:
   `lsp.lua` is only set inside the `LspAttach` autocmd, diagnostics/hover via `K` silently do
   nothing on those filetypes too. Install with `brew install node`. `gopls`, `terraformls`, and
   `lua_ls` don't need it.
+- **tree-sitter-cli** — install via `brew install tree-sitter-cli`. `brew install tree-sitter`
+  only gets you `libtree-sitter` (the C library); the `tree-sitter` *command*, which
+  nvim-treesitter's `main` branch shells out to for compiling every parser, is a separate
+  formula. Without it: `error: Error during "tree-sitter build": ... ENOENT ... 'tree-sitter'`
+  on every parser, no syntax highlighting for any filetype.
